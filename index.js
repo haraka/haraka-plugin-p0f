@@ -176,7 +176,7 @@ exports.register = function () {
 
 exports.load_p0f_ini = function () {
     var plugin = this;
-    plugin.cfg = plugin.config.get('connect.p0f.ini', function () {
+    plugin.cfg = plugin.config.get('p0f.ini', function () {
         plugin.load_p0f_ini();
     });
 }
@@ -244,7 +244,7 @@ exports.hook_data_post = function (next, connection) {
     }
 
     connection.transaction.remove_header(header_name);
-    var result = connection.results.get('connect.p0f');
+    var result = connection.results.get('p0f');
     if (!result || !result.os_name) {
         connection.results.add(plugin, {err: 'no p0f note'});
         return next();

@@ -48,10 +48,10 @@ server starts up.
 
 add an entry to config/plugins to enable p0f:
 
-    connect.p0f
+    p0f
 
 
-3. review settings in config/connect.p0f.ini
+3. review settings in config/p0f.ini
 
 
 ## Startup
