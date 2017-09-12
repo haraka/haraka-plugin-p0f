@@ -3,7 +3,6 @@
 [![Greenkeeper badge][gk-img]][gk-url]
 [![Windows Build Status][ci-win-img]][ci-win-url]
 [![NPM][npm-img]][npm-url]
-<!-- doesn't work in haraka plugins... yet. [![Code Coverage][cov-img]][cov-url]-->
 
 # haraka-plugin-p0f
 
@@ -53,6 +52,7 @@ add an entry to config/plugins to enable p0f:
 
 3. review settings in config/p0f.ini
 
+At a minimum, [main]socket_path must be defined.
 
 ## Startup
 
