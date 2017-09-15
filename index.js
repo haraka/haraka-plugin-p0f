@@ -73,7 +73,7 @@ P0FClient.prototype.decode_response = function (data) {
     function decode_string (data2, start, end) {
         let str = '';
         for (let a=start; a<end; a++) {
-            let b = data2.readUInt8(a);
+            const b = data2.readUInt8(a);
             if (b === 0x0) break;
             str = str + String.fromCharCode(b);
         }
@@ -195,18 +195,11 @@ exports.load_p0f_ini = function () {
 }
 
 exports.hook_init_master = function (next, server) {
-    const c = this.cfg.main;
-    if (!c.socket_path) return next();
-    // Start p0f process?
-    server.notes.p0f_client = new P0FClient(c.socket_path);
-    return next();
+    start_p0f_client(this.cfg.main.socket_path, server, next);
 }
 
 exports.hook_init_child = function (next, server) {
-    const c = this.cfg.main;
-    if (!c.socket_path) return next();
-    server.notes.p0f_client = new P0FClient(c.socket_path);
-    return next();
+    start_p0f_client(this.cfg.main.socket_path, server, next);
 };
 
 exports.hook_lookup_rdns = function onLookup (next, connection) {
