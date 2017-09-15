@@ -69,7 +69,8 @@ P0FClient.prototype.shutdown = function () {
 }
 
 P0FClient.prototype.decode_response = function (data) {
-    const decode_string = function (data2, start, end) {
+
+    function decode_string (data2, start, end) {
         let str = '';
         for (let a=start; a<end; a++) {
             const b = data2.readUInt8(a);
@@ -77,7 +78,7 @@ P0FClient.prototype.decode_response = function (data) {
             str = str + String.fromCharCode(b);
         }
         return str;
-    };
+    }
 
     if (this.receive_queue.length <= 0) {
         throw new Error('unexpected data received');
@@ -92,6 +93,7 @@ P0FClient.prototype.decode_response = function (data) {
     if (data.readUInt32LE(0) !== 0x50304602) {
         return item.cb(new Error('bad response magic!'));
     }
+
     // Status dword: 0x00 for 'bad query', 0x10 for 'OK', and 0x20 for 'no match'
     const st = data.readUInt32LE(4);
     switch (st) {
@@ -169,6 +171,16 @@ P0FClient.prototype.process_send_queue = function () {
     }
 };
 
+function start_p0f_client (sp, server, next) {
+    if (!sp) {
+        server.logerror("main.socket_path not defined in p0f.ini!");
+        return next();
+    }
+    // Start p0f process
+    server.notes.p0f_client = new P0FClient(sp);
+    next();
+}
+
 exports.P0FClient = P0FClient;
 
 exports.register = function () {
@@ -183,18 +195,11 @@ exports.load_p0f_ini = function () {
 }
 
 exports.hook_init_master = function (next, server) {
-    const c = this.cfg.main;
-    if (!c.socket_path) return next();
-    // Start p0f process?
-    server.notes.p0f_client = new P0FClient(c.socket_path);
-    return next();
+    start_p0f_client(this.cfg.main.socket_path, server, next);
 }
 
 exports.hook_init_child = function (next, server) {
-    const c = this.cfg.main;
-    if (!c.socket_path) return next();
-    server.notes.p0f_client = new P0FClient(c.socket_path);
-    return next();
+    start_p0f_client(this.cfg.main.socket_path, server, next);
 };
 
 exports.hook_lookup_rdns = function onLookup (next, connection) {
@@ -206,8 +211,7 @@ exports.hook_lookup_rdns = function onLookup (next, connection) {
         return next();
     }
 
-    const p0f_client = connection.server.notes.p0f_client;
-    p0f_client.query(connection.remote.ip, function (err, result) {
+    connection.server.notes.p0f_client.query(connection.remote.ip, (err, result) => {
         if (err) {
             connection.results.add(plugin, {err: err.message});
             return next();
@@ -220,7 +224,7 @@ exports.hook_lookup_rdns = function onLookup (next, connection) {
 
         connection.loginfo(plugin, format_results(result));
         connection.results.add(plugin, result);
-        return next();
+        next();
     });
 };
 
@@ -254,5 +258,5 @@ exports.hook_data_post = function (next, connection) {
     connection.logdebug(plugin, 'adding header');
     connection.transaction.add_header(header_name, format_results(result));
 
-    return next();
-};
+    next();
+}
