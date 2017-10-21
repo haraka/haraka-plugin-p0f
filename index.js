@@ -206,7 +206,7 @@ exports.hook_lookup_rdns = function onLookup (next, connection) {
     const plugin = this;
     if (connection.remote.is_private) return next();
 
-    if (!connection.server.notes.p0f_client) {
+    if (connection.server && (!connection.server.notes || !connection.server.notes.p0f_client)) {
         connection.logerror(plugin, 'missing server');
         return next();
     }
