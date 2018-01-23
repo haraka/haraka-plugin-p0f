@@ -47,6 +47,7 @@ class P0FClient {
             error.message = `${error.message} (socket: ${path})`;
             this.socket_has_error = error;
             this.sock.destroy();
+
             // Try and reconnect
             if (!this.restart_interval) {
                 this.restart_interval = setInterval(() => { connect(); }, 5 * 1000);
@@ -123,7 +124,7 @@ class P0FClient {
             case (0x20):
                 return item.cb(null, null);
             default:
-                throw new Error('unknown status: ' + st);
+                throw new Error(`unknown status: ${st}`);
         }
     }
 
@@ -229,11 +230,11 @@ exports.query_p0f = function onLookup (next, connection) {
 
 function format_results (r) {
     const data = [];
-    if (r.os_name) data.push('os="' + r.os_name + ' ' + r.os_flavor + '"');
-    if (r.link_type) data.push('link_type="' + r.link_type + '"');
-    if (r.distance) data.push('distance=' + r.distance);
-    if (r.total_conn) data.push('total_conn=' + r.total_conn);
-    if (r.last_nat) data.push('shared_ip=' + ((r.last_nat === 0) ? 'N' : 'Y'));
+    if (r.os_name) data.push(`os="${r.os_name} ${r.os_flavor}"`);
+    if (r.link_type) data.push(`link_type="${r.link_type}"`);
+    if (r.distance) data.push(`distance=${r.distance}`);
+    if (r.total_conn) data.push(`total_conn=${r.total_conn}`);
+    if (r.last_nat) data.push(`shared_ip=${((r.last_nat === 0) ? 'N' : 'Y')}`);
     return data.join(' ');
 }
 
