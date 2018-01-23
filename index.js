@@ -41,7 +41,7 @@ function P0FClient (path) {
 
         self.sock.on('error', function (error) {
             self.connected = false;
-            error.message = error.message + ' (socket: ' + path + ')';
+            error.message = `${error.message} (socket: ${path})`;
             self.socket_has_error = error;
             self.sock.destroy();
             // Try and reconnect
@@ -124,7 +124,7 @@ P0FClient.prototype.decode_response = function (data) {
         case (0x20):
             return item.cb(null, null);
         default:
-            throw new Error('unknown status: ' + st);
+            throw new Error(`unknown status: ${st}`);
     }
 };
 
@@ -230,11 +230,11 @@ exports.hook_lookup_rdns = function onLookup (next, connection) {
 
 function format_results (r) {
     const data = [];
-    if (r.os_name) data.push('os="' + r.os_name + ' ' + r.os_flavor + '"');
-    if (r.link_type) data.push('link_type="' + r.link_type + '"');
-    if (r.distance) data.push('distance=' + r.distance);
-    if (r.total_conn) data.push('total_conn=' + r.total_conn);
-    if (r.last_nat) data.push('shared_ip=' + ((r.last_nat === 0) ? 'N' : 'Y'));
+    if (r.os_name) data.push(`os="${r.os_name} ${r.os_flavor}"`);
+    if (r.link_type) data.push(`link_type="${r.link_type}"`);
+    if (r.distance) data.push(`distance=${r.distance}`);
+    if (r.total_conn) data.push(`total_conn=${r.total_conn}`);
+    if (r.last_nat) data.push(`shared_ip=${((r.last_nat === 0) ? 'N' : 'Y')}`);
     return data.join(' ');
 }
 
