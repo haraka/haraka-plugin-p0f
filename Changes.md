@@ -1,7 +1,7 @@
 
 ## 1.0.1 - 2017-09-11
 
-- when socket_path is not configured, emit an error 
+- when socket_path is not configured, emit an error
 
 ## 1.0.1 - 2017-09-01
 

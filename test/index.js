@@ -30,7 +30,7 @@ describe('load_p0f_ini', () => {
 })
 
 describe('lookup_rdns', () => {
-    it.skip('retrieves TCP fingerprint data from p0f server', function (done) {
+    it.skip('retrieves TCP fingerprint data from p0f server', (done) => {
         done()
     })
 })
@@ -49,7 +49,7 @@ describe('data_post', () => {
 
     it('adds a header when data exists', (done) => {
 
-        this.plugin.hook_data_post((code, value) => {
+        this.plugin.add_p0f_header((code, value) => {
             assert.ok(Object.keys(this.connection.transaction.header.headers))
             done()
         },
@@ -58,7 +58,7 @@ describe('data_post', () => {
 
     it('ignores private IPs', (done) => {
         this.connection.remote.is_private=true;
-        this.plugin.hook_data_post((code, value) => {
+        this.plugin.add_p0f_header((code, value) => {
             assert.equal(code, undefined)
             assert.equal(value, undefined)
             assert.equal(Object.keys(this.connection.transaction.header.headers), 0)
