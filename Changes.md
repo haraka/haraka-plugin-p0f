@@ -1,5 +1,8 @@
+## 1.0.3 - 2018-05-30
 
-## 1.0.1 - 2017-09-11
+- add_header option visible at config
+
+## 1.0.2 - 2017-09-11
 
 - when socket_path is not configured, emit an error
 
