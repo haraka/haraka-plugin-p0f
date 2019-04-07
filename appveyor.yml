@@ -14,8 +14,7 @@ before_test:
   - npm --version
 
 test_script:
-  - node node_modules\.bin\eslint *.js test/*.js
-  - node node_modules\.bin\mocha
+  - C:\projects\haraka-plugin-p0f\node_modules\.bin\mocha
 
 after_test:
 
