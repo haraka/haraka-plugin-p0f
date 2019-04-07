@@ -14,7 +14,8 @@ before_test:
   - npm --version
 
 test_script:
-  - npm test
+  - node node_modules\.bin\eslint *.js test/*.js
+  - node node_modules\.bin\mocha
 
 after_test:
 

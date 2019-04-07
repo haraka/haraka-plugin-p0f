@@ -4,8 +4,8 @@
   "description": "Haraka plugin that adds TCP fingerprinting",
   "main": "index.js",
   "scripts": {
-    "lint": "node node_modules/.bin/eslint *.js test/**/*.js",
-    "lintfix": "node node_modules/.bin/eslint --fix *.js test/**/*.js",
+    "lint": "node node_modules/.bin/eslint *.js test/*.js",
+    "lintfix": "node node_modules/.bin/eslint --fix *.js test/*.js",
     "test": "node node_modules/.bin/mocha test"
   },
   "repository": {
