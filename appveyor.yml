@@ -1,5 +1,5 @@
 environment:
-  nodejs_version: "6"
+  nodejs_version: "8"
 
 install:
   - ps: Install-Product node $env:nodejs_version
@@ -14,7 +14,7 @@ before_test:
   - npm --version
 
 test_script:
-  - npm test
+  - C:\projects\haraka-plugin-p0f\node_modules\.bin\mocha
 
 after_test:
 

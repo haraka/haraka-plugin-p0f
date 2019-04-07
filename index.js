@@ -50,7 +50,7 @@ class P0FClient {
 
             // Try and reconnect
             if (!this.restart_interval) {
-                this.restart_interval = setInterval(() => { connect(); }, 5 * 1000);
+                this.restart_interval = setInterval(() => { this.connect(); }, 5 * 1000);
             }
             // Clear the receive queue
             for (let i=0; i<this.receive_queue.length; i++) {

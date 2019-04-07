@@ -8,8 +8,7 @@
 
 TCP Fingerprinting
 
-Use TCP fingerprint info (remote computer OS, network distance, etc) to
-implement more sophisticated anti-spam policies.
+Supply TCP fingerprint info (remote computer OS, network distance, etc) about the remote mail server. This can be used to implement more sophisticated anti-spam policies.
 
 This plugin inserts a _p0f_ connection note with information deduced
 from the TCP fingerprint. The note typically includes at least the link,
