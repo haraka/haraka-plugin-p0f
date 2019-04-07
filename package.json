@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "node node_modules/.bin/eslint *.js test/**/*.js",
     "lintfix": "node node_modules/.bin/eslint --fix *.js test/**/*.js",
-    "test": "node_modules/.bin/mocha"
+    "test": "node node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
