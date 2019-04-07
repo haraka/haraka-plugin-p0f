@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "node node_modules/.bin/eslint *.js test/**/*.js",
     "lintfix": "node node_modules/.bin/eslint --fix *.js test/**/*.js",
-    "test": "mocha"
+    "test": "node_modules/.bin/mocha"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
     "plugin",
     "p0f"
   ],
-  "author": "Haraka Team <haraka-mail@gmail.com>",
+  "author": "Haraka Team <haraka.mail@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/haraka/haraka-plugin-p0f/issues"
