@@ -30,6 +30,6 @@
     "mocha": "*"
   },
   "dependencies": {
-    "ipaddr.js": "^1.4.0"
+    "ipaddr.js": "^1.9.1"
   }
 }
