@@ -1,3 +1,8 @@
+
+## 1.0.4 - 2019-12-23
+
+- update to es6 classes
+
 ## 1.0.3 - 2018-05-30
 
 - add_header option visible at config
