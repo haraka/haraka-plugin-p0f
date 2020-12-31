@@ -144,10 +144,10 @@ class P0FClient {
             buf.writeUInt8(bytes[i], 5 + i);
         }
         if (!this.ready) {
-            this.send_queue.push({ip: ip, cb: cb, buf: buf});
+            this.send_queue.push({ip, cb, buf});
         }
         else {
-            this.receive_queue.push({ip: ip, cb: cb});
+            this.receive_queue.push({ip, cb});
             if (!this.sock.write(buf)) this.ready = false;
         }
     }
@@ -188,7 +188,7 @@ exports.load_p0f_ini = function () {
     const plugin = this;
     plugin.cfg = plugin.config.get('p0f.ini', function () {
         plugin.load_p0f_ini();
-    });
+    })
 }
 
 exports.start_p0f_client = function (next, server) {

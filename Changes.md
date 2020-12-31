@@ -1,4 +1,9 @@
 
+## 1.0.5 - 2020-12-30
+
+- es6: use object shorthand
+- update dep ipaddr.js version
+
 ## 1.0.4 - 2019-12-23
 
 - update to es6 classes
