@@ -60,10 +60,10 @@ In the contrib/bsd-rc.d directory is a startup file for FreeBSD.
 
 
 <!-- leave these buried at the bottom of the document -->
-[ci-img]: https://travis-ci.org/haraka/haraka-plugin-p0f.svg
-[ci-url]: https://travis-ci.org/haraka/haraka-plugin-p0f
-[ci-win-img]: https://ci.appveyor.com/api/projects/status/eh4or0tpwldv2fx7?svg=true
-[ci-win-url]: https://ci.appveyor.com/project/msimerson/haraka-plugin-p0f
+[ci-img]: https://github.com/haraka/haraka-plugin-p0f/workflows/Tests/badge.svg
+[ci-url]: https://github.com/haraka/haraka-plugin-p0f/actions?query=workflow%3ATests
+[ci-win-img]: https://github.com/haraka/haraka-plugin-p0f/workflows/Tests%20-%20Windows/badge.svg
+[ci-win-url]: https://github.com/haraka/haraka-plugin-p0f/actions?query=workflow%3A%22Tests+-+Windows%22
 [cov-img]: https://codecov.io/github/haraka/haraka-plugin-p0f/coverage.svg
 [cov-url]: https://codecov.io/github/haraka/haraka-plugin-p0f
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-p0f/badges/gpa.svg
