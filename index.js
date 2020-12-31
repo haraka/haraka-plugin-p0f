@@ -144,10 +144,10 @@ class P0FClient {
             buf.writeUInt8(bytes[i], 5 + i);
         }
         if (!this.ready) {
-            this.send_queue.push({ip: ip, cb: cb, buf: buf});
+            this.send_queue.push({ip, cb, buf});
         }
         else {
-            this.receive_queue.push({ip: ip, cb: cb});
+            this.receive_queue.push({ip, cb});
             if (!this.sock.write(buf)) this.ready = false;
         }
     }
