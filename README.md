@@ -1,6 +1,5 @@
 [![Build Status][ci-img]][ci-url]
 [![Code Climate][clim-img]][clim-url]
-[![Greenkeeper badge][gk-img]][gk-url]
 [![Windows Build Status][ci-win-img]][ci-win-url]
 [![NPM][npm-img]][npm-url]
 
@@ -69,7 +68,5 @@ In the contrib/bsd-rc.d directory is a startup file for FreeBSD.
 [cov-url]: https://codecov.io/github/haraka/haraka-plugin-p0f
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-p0f/badges/gpa.svg
 [clim-url]: https://codeclimate.com/github/haraka/haraka-plugin-p0f
-[gk-img]: https://badges.greenkeeper.io/haraka/haraka-plugin-p0f.svg
-[gk-url]: https://greenkeeper.io/
 [npm-img]: https://nodei.co/npm/haraka-plugin-p0f.png
 [npm-url]: https://www.npmjs.com/package/haraka-plugin-p0f
