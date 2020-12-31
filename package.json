@@ -1,6 +1,6 @@
 {
   "name": "haraka-plugin-p0f",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Haraka plugin that adds TCP fingerprinting",
   "main": "index.js",
   "scripts": {
