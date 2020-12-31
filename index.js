@@ -188,7 +188,7 @@ exports.load_p0f_ini = function () {
     const plugin = this;
     plugin.cfg = plugin.config.get('p0f.ini', function () {
         plugin.load_p0f_ini();
-    });
+    })
 }
 
 exports.start_p0f_client = function (next, server) {
