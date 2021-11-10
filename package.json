@@ -1,6 +1,6 @@
 {
   "name": "haraka-plugin-p0f",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Haraka plugin that adds TCP fingerprinting",
   "main": "index.js",
   "scripts": {
@@ -25,12 +25,12 @@
   },
   "homepage": "https://github.com/haraka/haraka-plugin-p0f#readme",
   "devDependencies": {
-    "eslint": ">=6",
+    "eslint": ">=8",
     "eslint-plugin-haraka": "*",
     "haraka-test-fixtures": "*",
     "mocha": "*"
   },
   "dependencies": {
-    "ipaddr.js": "^2.0.0"
+    "ipaddr.js": "^2.0.1"
   }
 }

@@ -50,7 +50,7 @@ add an entry to config/plugins to enable p0f:
 
 3. review settings in config/p0f.ini
 
-At a minimum, [main]socket_path must be defined.
+At a minimum, `[main]socket_path` must be defined.
 
 ## Startup
 
