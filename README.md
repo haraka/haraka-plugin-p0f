@@ -1,6 +1,5 @@
 [![Build Status][ci-img]][ci-url]
 [![Code Climate][clim-img]][clim-url]
-[![Windows Build Status][ci-win-img]][ci-win-url]
 [![NPM][npm-img]][npm-url]
 
 # haraka-plugin-p0f
@@ -60,12 +59,8 @@ In the contrib/bsd-rc.d directory is a startup file for FreeBSD.
 
 
 <!-- leave these buried at the bottom of the document -->
-[ci-img]: https://github.com/haraka/haraka-plugin-p0f/workflows/Tests/badge.svg
-[ci-url]: https://github.com/haraka/haraka-plugin-p0f/actions?query=workflow%3ATests
-[ci-win-img]: https://github.com/haraka/haraka-plugin-p0f/workflows/Tests%20-%20Windows/badge.svg
-[ci-win-url]: https://github.com/haraka/haraka-plugin-p0f/actions?query=workflow%3A%22Tests+-+Windows%22
-[cov-img]: https://codecov.io/github/haraka/haraka-plugin-p0f/coverage.svg
-[cov-url]: https://codecov.io/github/haraka/haraka-plugin-p0f
+[ci-img]: https://github.com/haraka/haraka-plugin-p0f/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/haraka/haraka-plugin-p0f/actions/workflows/ci.yml
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-p0f/badges/gpa.svg
 [clim-url]: https://codeclimate.com/github/haraka/haraka-plugin-p0f
 [npm-img]: https://nodei.co/npm/haraka-plugin-p0f.png
