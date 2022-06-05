@@ -7,6 +7,7 @@
 - ci: update GHA workflow with shared
 - doc(changes): add Unreleased marker
 - ci: add submodule .release
+- test: require mocha >= 9
 
 
 ### 1.0.6 - 2021-11-10

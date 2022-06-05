@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "cover": "NODE_ENV=cov npx nyc --reporter=lcovonly npm run test",
-    "lint": "npx eslint *.js test/*.js",
-    "lintfix": "npx eslint --fix *.js test/*.js",
+    "lint": "npx eslint *.js test",
+    "lintfix": "npx eslint --fix *.js test",
     "test": "npx mocha"
   },
   "repository": {
@@ -28,7 +28,7 @@
     "eslint": ">=8",
     "eslint-plugin-haraka": "*",
     "haraka-test-fixtures": "*",
-    "mocha": "*"
+    "mocha": ">=9"
   },
   "dependencies": {
     "ipaddr.js": "^2.0.1"
