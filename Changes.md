@@ -1,6 +1,13 @@
 ### Unreleased
 
 
+### [1.0.8] - 2022-07-07
+
+- ci: use .github test workflow
+- ci: only publish when package.json changes
+- Added systemd.service file (#25)
+
+
 ### [1.0.7] - 2022-06-05
 
 - ci: update GHA workflow with shared
@@ -46,3 +53,4 @@
 
 
 [1.0.7]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/1.0.7
+[1.0.8]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/1.0.8
