@@ -3,13 +3,18 @@
   "version": "1.0.10",
   "description": "Haraka plugin that adds TCP fingerprinting",
   "files": [
-    "config", "contrib", "CHANGELOG.md"
+    "config",
+    "contrib",
+    "CHANGELOG.md"
   ],
   "main": "index.js",
   "scripts": {
     "cover": "NODE_ENV=cov npx nyc --reporter=lcovonly npm run test",
+    "format": "npm run prettier:fix && npm run lint:fix",
     "lint": "npx eslint *.js test",
     "lint:fix": "npx eslint --fix *.js test",
+    "prettier": "npx prettier . --check",
+    "prettier:fix": "npx prettier . --write --log-level=warn",
     "test": "npx mocha",
     "versions": "npx dependency-version-checker check",
     "versions:fix": "npx dependency-version-checker update"

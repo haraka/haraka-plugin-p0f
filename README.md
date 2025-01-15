@@ -11,25 +11,23 @@ This plugin inserts a _p0f_ connection note with information deduced
 from the TCP fingerprint. The note typically includes at least the link,
 detail, distance, uptime, genre. Here's an example:
 
- genre    => FreeBSD
- detail   => 8.x (1)
- uptime   => 1390
- link     => ethernet/modem
- distance => 17
+  genre => FreeBSD
+  detail => 8.x (1)
+  uptime => 1390
+  link => ethernet/modem
+  distance => 17
 
 Which was parsed from this p0f fingerprint:
 
   24.18.227.2:39435 - FreeBSD 8.x (1) (up: 1390 hrs)
-    -> 208.75.177.101:25 (distance 17, link: ethernet/modem)
+  -> 208.75.177.101:25 (distance 17, link: ethernet/modem)
 
 The following additional values may also be available in
 the _p0f_ connection note:
 
     magic, status, first_seen, last_seen, total_conn, uptime_min, up_mod_days, last_nat, last_chg, distance, bad_sw, os_match_q, os_name, os_flavor, http_name, http_flavor, link_type, and language.
 
-
-Configuration
------------------
+## Configuration
 
 1. start p0f
 
@@ -45,7 +43,6 @@ add an entry to config/plugins to enable p0f:
 
     p0f
 
-
 3. review settings in config/p0f.ini
 
 At a minimum, `[main]socket_path` must be defined.
@@ -56,8 +53,8 @@ In the contrib/ubuntu-upstart directory is a config file (p0f.conf) for Ubuntu.
 
 In the contrib/bsd-rc.d directory is a startup file for FreeBSD.
 
-
 <!-- leave these buried at the bottom of the document -->
+
 [ci-img]: https://github.com/haraka/haraka-plugin-p0f/actions/workflows/ci.yml/badge.svg
 [ci-url]: https://github.com/haraka/haraka-plugin-p0f/actions/workflows/ci.yml
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-p0f/badges/gpa.svg
