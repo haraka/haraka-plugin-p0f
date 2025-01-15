@@ -1,4 +1,15 @@
+# Changelog
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/).
+
 ### Unreleased
+
+### [1.0.10] - 2025-01-14
+
+- populate [files] in package.json.
+- deps: bump versions
+- dep(eslint): upgrade to v9
+- dep: eslint-plugin-haraka -> @haraka/eslint-config
 
 ### [1.0.9] - 2022-11-10
 
@@ -57,3 +68,6 @@
 
 [1.0.7]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/1.0.7
 [1.0.8]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/1.0.8
+[1.0.10]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.10
+[1.0.6]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/1.0.6
+[1.0.9]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/1.0.9

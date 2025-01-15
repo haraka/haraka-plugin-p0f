@@ -42,7 +42,7 @@ describe('data_post', () => {
         this.plugin.load_p0f_ini()
         this.plugin.cfg.main.add_header = 'X-p0f-Result'
         this.connection = new fixtures.connection.createConnection()
-        this.connection.transaction = new fixtures.transaction.createTransaction()
+        this.connection.init_transaction()
         this.connection.results.add({ name: 'p0f' }, { os_name: 'BeOS', os_flavor: 'forever'})
         done()
     })
