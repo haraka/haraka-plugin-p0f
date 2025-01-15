@@ -1,13 +1,23 @@
 {
   "name": "haraka-plugin-p0f",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Haraka plugin that adds TCP fingerprinting",
+  "files": [
+    "config",
+    "contrib",
+    "CHANGELOG.md"
+  ],
   "main": "index.js",
   "scripts": {
     "cover": "NODE_ENV=cov npx nyc --reporter=lcovonly npm run test",
+    "format": "npm run prettier:fix && npm run lint:fix",
     "lint": "npx eslint *.js test",
-    "lintfix": "npx eslint --fix *.js test",
-    "test": "npx mocha"
+    "lint:fix": "npx eslint --fix *.js test",
+    "prettier": "npx prettier . --check",
+    "prettier:fix": "npx prettier . --write --log-level=warn",
+    "test": "npx mocha",
+    "versions": "npx dependency-version-checker check",
+    "versions:fix": "npx dependency-version-checker update"
   },
   "repository": {
     "type": "git",
@@ -25,12 +35,11 @@
   },
   "homepage": "https://github.com/haraka/haraka-plugin-p0f#readme",
   "devDependencies": {
-    "eslint": ">=8",
-    "eslint-plugin-haraka": "*",
-    "haraka-test-fixtures": "*",
-    "mocha": ">=9"
+    "@haraka/eslint-config": "^2.0.2",
+    "haraka-test-fixtures": "^1.3.8",
+    "mocha": "^11.1.0"
   },
   "dependencies": {
-    "ipaddr.js": "^2.0.1"
+    "ipaddr.js": "^2.2.0"
   }
 }

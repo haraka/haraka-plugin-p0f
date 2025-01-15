@@ -1,12 +1,11 @@
 name: CI
 
-on: [ push ]
+on: [push, pull_request]
 
 env:
   CI: true
 
 jobs:
-
   lint:
     uses: haraka/.github/.github/workflows/lint.yml@master
 
@@ -15,5 +14,5 @@ jobs:
   #   secrets: inherit
 
   ubuntu:
-    needs: [ lint ]
+    needs: [lint]
     uses: haraka/.github/.github/workflows/ubuntu.yml@master
