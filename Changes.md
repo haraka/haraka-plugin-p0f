@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### [1.0.10] - 2025-01-14
 
+- doc(CONTRIBUTORS): added
 - populate [files] in package.json.
 - deps: bump versions
 - dep(eslint): upgrade to v9
