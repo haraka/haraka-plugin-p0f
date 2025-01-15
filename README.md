@@ -11,16 +11,16 @@ This plugin inserts a _p0f_ connection note with information deduced
 from the TCP fingerprint. The note typically includes at least the link,
 detail, distance, uptime, genre. Here's an example:
 
-  genre => FreeBSD
-  detail => 8.x (1)
-  uptime => 1390
-  link => ethernet/modem
-  distance => 17
+genre => FreeBSD
+detail => 8.x (1)
+uptime => 1390
+link => ethernet/modem
+distance => 17
 
 Which was parsed from this p0f fingerprint:
 
-  24.18.227.2:39435 - FreeBSD 8.x (1) (up: 1390 hrs)
-  -> 208.75.177.101:25 (distance 17, link: ethernet/modem)
+24.18.227.2:39435 - FreeBSD 8.x (1) (up: 1390 hrs)
+-> 208.75.177.101:25 (distance 17, link: ethernet/modem)
 
 The following additional values may also be available in
 the _p0f_ connection note:
