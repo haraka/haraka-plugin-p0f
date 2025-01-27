@@ -1,7 +1,8 @@
 'use strict'
 // p0f v3 client - http://lcamtuf.coredump.cx/p0f3/
 
-const net = require('net')
+const net = require('node:net')
+
 const ipaddr = require('ipaddr.js')
 
 class P0FClient {
