@@ -1,12 +1,8 @@
 // node.js built-in modules
-const assert = require('assert')
+const assert = require('node:assert')
 
 // npm modules
 const fixtures = require('haraka-test-fixtures')
-
-// start of tests
-//    assert: https://nodejs.org/api/assert.html
-//    mocha: http://mochajs.org
 
 beforeEach((done) => {
   this.plugin = new fixtures.plugin('p0f')
