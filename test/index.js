@@ -6,6 +6,12 @@ const fixtures = require('haraka-test-fixtures')
 
 beforeEach(() => {
   this.plugin = new fixtures.plugin('p0f')
+
+  // replace vm-compiled functions with instrumented versions for coverage tracking
+  if (process.env.HARAKA_COVERAGE) {
+    const plugin_module = require('../index.js')
+    Object.assign(this.plugin, plugin_module)
+  }
 })
 
 describe('p0f', () => {
