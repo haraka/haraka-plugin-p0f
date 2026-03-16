@@ -37,7 +37,6 @@
   "devDependencies": {
     "@haraka/eslint-config": "^2.0.3",
     "haraka-test-fixtures": "^1.3.10",
-    "c8": "^11.0.0"
   },
   "dependencies": {
     "ipaddr.js": "^2.2.0"
