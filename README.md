@@ -1,5 +1,6 @@
 [![Build Status][ci-img]][ci-url]
 [![Code Climate][clim-img]][clim-url]
+[![Code Coverage][cov-img]][cov-url]
 
 # haraka-plugin-p0f
 
@@ -59,3 +60,5 @@ In the contrib/bsd-rc.d directory is a startup file for FreeBSD.
 [ci-url]: https://github.com/haraka/haraka-plugin-p0f/actions/workflows/ci.yml
 [clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-p0f/badges/gpa.svg
 [clim-url]: https://codeclimate.com/github/haraka/haraka-plugin-p0f
+[cov-url]: https://coveralls.io/github/haraka/haraka-plugin-p0f
+[cov-img]: https://coveralls.io/repos/github/haraka/haraka-plugin-p0f/badge.svg
