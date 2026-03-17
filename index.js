@@ -138,7 +138,7 @@ class P0FClient {
     }
     const addr = ipaddr.parse(ip)
     const bytes = addr.toByteArray()
-    const buf = new Buffer(21)
+    const buf = new Buffer.alloc(21)
     buf.writeUInt32LE(0x50304601, 0) // query magic
     buf.writeUInt8(addr.kind() === 'ipv6' ? 0x6 : 0x4, 4)
     for (let i = 0; i < bytes.length; i++) {
