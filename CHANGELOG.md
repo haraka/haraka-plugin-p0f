@@ -4,10 +4,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
-### Added
+### [1.0.13] - 2026-03-17
 
-- test: add instrumentation to measure test coverage
-- deps: bump versions
+- ci: enable coverage testing (#35)
+- test: added tests to improve coverage (#34)
+- test: add instrumentation to measure test coverage (#33)
+- deps: bump versions to latest
+- test: remove unnecessary done callbacks in async tests (#32)
+- es6: convert callback-style tests to async/await Promise wrappers
 
 ### [1.0.11] - 2025-01-26
 
@@ -76,3 +80,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.0.9]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/1.0.9
 [1.0.10]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.10
 [1.0.11]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.11
+[1.0.13]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.13
