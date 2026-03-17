@@ -205,7 +205,7 @@ describe('add_p0f_header', function () {
     sinon.assert.calledOnceWithExactly(this.next)
     //assert.equal(this.connection.transaction.header.headers['x-p0f-result'], undefined)
     assert.ok(conn.results.has(this.plugin, 'err', 'no p0f note'))
-    assert.equal(this.connection.transaction.header.get('X-p0f-Result').length, 0)
+    assert.equal(conn.transaction.header.get('X-p0f-Result').length, 0)
   })
 })
 
