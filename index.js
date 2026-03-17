@@ -212,24 +212,21 @@ exports.query_p0f = function onLookup(next, connection) {
     return next()
   }
 
-  connection.server.notes.p0f_client.query(
-    connection.remote.ip,
-    (err, result) => {
-      if (err) {
-        connection.results.add(plugin, { err: err.message })
-        return next()
-      }
+  connection.server.notes.p0f_client.query(connection.remote.ip, (err, result) => {
+    if (err) {
+      connection.results.add(plugin, { err: err.message })
+      return next()
+    }
 
-      if (!result) {
-        connection.results.add(plugin, { err: 'no p0f results' })
-        return next()
-      }
+    if (!result) {
+      connection.results.add(plugin, { err: 'no p0f results' })
+      return next()
+    }
 
-      connection.loginfo(plugin, format_results(result))
-      connection.results.add(plugin, result)
-      next()
-    },
-  )
+    connection.loginfo(plugin, format_results(result))
+    connection.results.add(plugin, result)
+    next()
+  })
 }
 
 function format_results(r) {

@@ -132,18 +132,16 @@ describe('query_p0f', function () {
     this.connection.remote.ip = '1.2.3.4'
     this.connection.server.notes = {
       p0f_client: {
-        query: sinon
-          .stub()
-          .callsFake((_ip, cb) =>
-            cb(null, {
-              os_name: 'Linux',
-              os_flavor: '3.x',
-              link_type: 'Ethernet',
-              distance: 2,
-              total_conn: 10,
-              last_nat: 0,
-            }),
-          ),
+        query: sinon.stub().callsFake((_ip, cb) =>
+          cb(null, {
+            os_name: 'Linux',
+            os_flavor: '3.x',
+            link_type: 'Ethernet',
+            distance: 2,
+            total_conn: 10,
+            last_nat: 0,
+          }),
+        ),
       },
     }
 
