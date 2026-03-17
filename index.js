@@ -243,23 +243,22 @@ function format_results(r) {
 }
 
 exports.add_p0f_header = function (next, connection) {
-  const plugin = this
   if (connection.remote.is_private) return next()
 
-  const header_name = plugin.cfg.main.add_header
+  const header_name = this.cfg.main.add_header
   if (!header_name) {
-    connection.logdebug(plugin, 'header disabled in ini')
+    connection.logdebug(this, 'header disabled in ini')
     return next()
   }
 
   connection.transaction.remove_header(header_name)
   const result = connection.results.get('p0f')
   if (!result || !result.os_name) {
-    connection.results.add(plugin, { err: 'no p0f note' })
+    connection.results.add(this, { err: 'no p0f note' })
     return next()
   }
 
-  connection.logdebug(plugin, 'adding header')
+  connection.logdebug(this, 'adding header')
   connection.transaction.add_header(header_name, format_results(result))
 
   next()
