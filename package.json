@@ -15,7 +15,7 @@
     "prettier": "npx prettier . --check",
     "prettier:fix": "npx prettier . --write --log-level=warn",
     "test": "npx mocha",
-    "test:coverage": "HARAKA_COVERAGE=1 npx c8 npm test",
+    "test:coverage": "npx c8 --reporter=html --reporter=text --reporter=text-summary npm test",
     "versions": "npx dependency-version-checker check",
     "versions:fix": "npx dependency-version-checker update"
   },
@@ -35,8 +35,8 @@
   },
   "homepage": "https://github.com/haraka/haraka-plugin-p0f#readme",
   "devDependencies": {
-    "@haraka/eslint-config": "^2.0.3",
-    "haraka-test-fixtures": "^1.3.10",
+    "@haraka/eslint-config": "^2.0.4",
+    "haraka-test-fixtures": "^1.4.0",
     "sinon": "^21.0.3"
   },
   "dependencies": {
@@ -44,13 +44,6 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "c8": {
-    "reporter": [
-      "text",
-      "text-summary",
-      "html"
-    ]
   },
   "prettier": {
     "printWidth": 120,

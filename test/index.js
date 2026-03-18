@@ -1,27 +1,30 @@
-// node.js built-in modules
 const assert = require('node:assert')
-const sinon = require('sinon')
-
-// plugin module (for P0FClient access)
-const { P0FClient } = require('../index.js')
 
 // npm modules
 const fixtures = require('haraka-test-fixtures')
+const sinon = require('sinon')
+
+const { P0FClient } = require('../index.js')
+
+function stubNetConnection() {
+  const net = require('node:net')
+  const EventEmitter = require('node:events').EventEmitter
+  const fakeSock = new EventEmitter()
+  fakeSock.setTimeout = sinon.stub()
+  fakeSock.write = sinon.stub().returns(true)
+  fakeSock.destroy = sinon.stub()
+  sinon.stub(net, 'createConnection').returns(fakeSock)
+  return fakeSock
+}
 
 beforeEach(function () {
   this.plugin = new fixtures.plugin('p0f')
   this.connection = new fixtures.connection.createConnection()
   this.connection.init_transaction()
 
-  // replace vm-compiled functions with instrumented versions for coverage tracking
-  if (process.env.HARAKA_COVERAGE) {
-    const plugin_module = require('../index.js')
-    Object.assign(this.plugin, plugin_module)
-  }
-
   this.plugin.register()
 
-  this.next = sinon.stub()
+  this.next = sinon.spy()
 })
 
 afterEach(sinon.restore)
@@ -30,28 +33,21 @@ describe('p0f', function () {
   it('loads', function () {
     assert.ok(this.plugin)
   })
-})
 
-describe('register', function () {
-  it('should have register function', function () {
+  it('registers', function () {
     const load_p0f_ini_spy = sinon.spy(this.plugin, 'load_p0f_ini')
-
     assert.strictEqual('function', typeof this.plugin.register)
 
     this.plugin.register()
 
-    assert.ok(this.plugin.register_hook.called)
     assert.ok(load_p0f_ini_spy.calledOnce)
   })
 
   it('registers hooks', function () {
-    let hook_count = 0
-    assert.strictEqual(this.plugin.register_hook.args[hook_count++][1], 'start_p0f_client')
-    assert.strictEqual(this.plugin.register_hook.args[hook_count++][1], 'start_p0f_client')
-    assert.strictEqual(this.plugin.register_hook.args[hook_count++][1], 'query_p0f')
-    assert.strictEqual(this.plugin.register_hook.args[hook_count++][1], 'add_p0f_header')
-
-    assert.strictEqual(this.plugin.register_hook.args.length, hook_count)
+    assert.deepStrictEqual(this.plugin.hooks.init_master, ['start_p0f_client'])
+    assert.deepStrictEqual(this.plugin.hooks.init_child, ['start_p0f_client'])
+    assert.deepStrictEqual(this.plugin.hooks.lookup_rdns, ['query_p0f'])
+    assert.deepStrictEqual(this.plugin.hooks.data_post, ['add_p0f_header'])
   })
 })
 
@@ -79,11 +75,16 @@ describe('start_p0f_client', function () {
     this.plugin.start_p0f_client(next, server)
 
     sinon.assert.calledOnce(next)
-    sinon.assert.calledWith(next)
   })
 })
 
 describe('query_p0f', function () {
+  beforeEach(function () {
+    this.connection.remote.is_private = false
+    this.connection.remote.ip = '1.2.3.4'
+    this.connection.server.notes = {}
+  })
+
   it('ignores private IPs', async function () {
     this.connection.remote = { is_private: true }
 
@@ -93,16 +94,12 @@ describe('query_p0f', function () {
   })
 
   it('calls next if p0f client is missing', async function () {
-    this.connection.remote.is_private = false
-    this.connection.server.notes = {}
-
     await this.plugin.query_p0f(this.next, this.connection)
 
     sinon.assert.calledOnceWithExactly(this.next)
   })
 
   it('stores error result when p0f query fails', async function () {
-    this.connection.remote.is_private = false
     this.connection.server.notes = {
       p0f_client: { query: sinon.stub().callsFake((_ip, cb) => cb(new Error('connection refused'))) },
     }
@@ -115,7 +112,6 @@ describe('query_p0f', function () {
   })
 
   it('stores error result when p0f returns no match', async function () {
-    this.connection.remote.is_private = false
     this.connection.server.notes = {
       p0f_client: { query: sinon.stub().callsFake((_ip, cb) => cb(null, null)) },
     }
@@ -128,8 +124,6 @@ describe('query_p0f', function () {
   })
 
   it('stores p0f result on success', async function () {
-    this.connection.remote.is_private = false
-    this.connection.remote.ip = '1.2.3.4'
     this.connection.server.notes = {
       p0f_client: {
         query: sinon.stub().callsFake((_ip, cb) =>
@@ -218,14 +212,7 @@ describe('P0FClient.decode_response', function () {
   }
 
   beforeEach(function () {
-    const net = require('node:net')
-    const EventEmitter = require('node:events').EventEmitter
-    const fakeSock = new EventEmitter()
-    fakeSock.setTimeout = sinon.stub()
-    fakeSock.write = sinon.stub().returns(true)
-    fakeSock.destroy = sinon.stub()
-    sinon.stub(net, 'createConnection').returns(fakeSock)
-
+    stubNetConnection()
     this.client = new P0FClient('/tmp/fake.sock')
   })
 
@@ -309,14 +296,7 @@ describe('P0FClient.decode_response', function () {
 
 describe('P0FClient.query', function () {
   beforeEach(function () {
-    const net = require('node:net')
-    const EventEmitter = require('node:events').EventEmitter
-    const fakeSock = new EventEmitter()
-    fakeSock.setTimeout = sinon.stub()
-    fakeSock.write = sinon.stub().returns(true)
-    fakeSock.destroy = sinon.stub()
-    sinon.stub(net, 'createConnection').returns(fakeSock)
-
+    stubNetConnection()
     this.client = new P0FClient('/tmp/fake.sock')
     this.client.connected = true
     this.client.ready = true
