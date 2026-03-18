@@ -187,9 +187,8 @@ exports.register = function () {
 }
 
 exports.load_p0f_ini = function () {
-  const plugin = this
-  plugin.cfg = plugin.config.get('p0f.ini', function () {
-    plugin.load_p0f_ini()
+  this.cfg = this.config.get('p0f.ini', () => {
+    this.load_p0f_ini()
   })
 }
 
@@ -204,27 +203,26 @@ exports.start_p0f_client = function (next, server) {
 }
 
 exports.query_p0f = function onLookup(next, connection) {
-  const plugin = this
   if (connection.remote.is_private) return next()
 
   if (!connection.server.notes.p0f_client) {
-    connection.logerror(plugin, 'missing p0f client')
+    connection.logerror(this, 'missing p0f client')
     return next()
   }
 
   connection.server.notes.p0f_client.query(connection.remote.ip, (err, result) => {
     if (err) {
-      connection.results.add(plugin, { err: err.message })
+      connection.results.add(this, { err: err.message })
       return next()
     }
 
     if (!result) {
-      connection.results.add(plugin, { err: 'no p0f results' })
+      connection.results.add(this, { err: 'no p0f results' })
       return next()
     }
 
-    connection.loginfo(plugin, format_results(result))
-    connection.results.add(plugin, result)
+    connection.loginfo(this, format_results(result))
+    connection.results.add(this, result)
     next()
   })
 }

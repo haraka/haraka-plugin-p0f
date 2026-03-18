@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+- cover: removed HARAKA_COVERAGE, more CLI and less config
+- test: DRY refactoring
+- test: updates paired with test-fixtures v1.4
+- style: replace plugin -> this
+
 ### [1.0.13] - 2026-03-17
 
 - ci: enable coverage testing (#35)
