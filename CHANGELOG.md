@@ -4,7 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
-- cover: removed HARAKA_COVERAGE, more CLI and less config
+### [1.0.14] - 2026-05-18
+
+- cover: removed HARAKA_COVERAGE, more CLI and less config (#38)
 - test: DRY refactoring
 - test: updates paired with test-fixtures v1.4
 - style: replace plugin -> this
@@ -86,3 +88,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.0.10]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.10
 [1.0.11]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.11
 [1.0.13]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.13
+[1.0.14]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.14

@@ -1,4 +1,5 @@
 const assert = require('node:assert')
+const { describe, it, beforeEach, afterEach } = require('node:test')
 
 // npm modules
 const fixtures = require('haraka-test-fixtures')
@@ -17,52 +18,65 @@ function stubNetConnection() {
   return fakeSock
 }
 
-beforeEach(function () {
-  this.plugin = new fixtures.plugin('p0f')
-  this.connection = new fixtures.connection.createConnection()
-  this.connection.init_transaction()
+// a valid 232-byte p0f v3 "OK" (0x10) response
+function okResponse(osName = 'Linux', flavor = '3.x') {
+  const b = Buffer.alloc(232)
+  b.writeUInt32LE(0x50304602, 0) // response magic
+  b.writeUInt32LE(0x10, 4) // status OK
+  b.writeUInt32LE(42, 16) // total_conn
+  b.write(osName, 40)
+  b.write(flavor, 72)
+  return b
+}
 
-  this.plugin.register()
+let plugin, connection, next
 
-  this.next = sinon.spy()
+beforeEach(() => {
+  plugin = new fixtures.plugin('p0f')
+  connection = new fixtures.connection.createConnection()
+  connection.init_transaction()
+
+  plugin.register()
+
+  next = sinon.spy()
 })
 
-afterEach(sinon.restore)
+afterEach(() => sinon.restore())
 
-describe('p0f', function () {
-  it('loads', function () {
-    assert.ok(this.plugin)
+describe('p0f', () => {
+  it('loads', () => {
+    assert.ok(plugin)
   })
 
-  it('registers', function () {
-    const load_p0f_ini_spy = sinon.spy(this.plugin, 'load_p0f_ini')
-    assert.strictEqual('function', typeof this.plugin.register)
+  it('registers', () => {
+    const load_p0f_ini_spy = sinon.spy(plugin, 'load_p0f_ini')
+    assert.strictEqual('function', typeof plugin.register)
 
-    this.plugin.register()
+    plugin.register()
 
     assert.ok(load_p0f_ini_spy.calledOnce)
   })
 
-  it('registers hooks', function () {
-    assert.deepStrictEqual(this.plugin.hooks.init_master, ['start_p0f_client'])
-    assert.deepStrictEqual(this.plugin.hooks.init_child, ['start_p0f_client'])
-    assert.deepStrictEqual(this.plugin.hooks.lookup_rdns, ['query_p0f'])
-    assert.deepStrictEqual(this.plugin.hooks.data_post, ['add_p0f_header'])
+  it('registers hooks', () => {
+    assert.deepStrictEqual(plugin.hooks.init_master, ['start_p0f_client'])
+    assert.deepStrictEqual(plugin.hooks.init_child, ['start_p0f_client'])
+    assert.deepStrictEqual(plugin.hooks.lookup_rdns, ['query_p0f'])
+    assert.deepStrictEqual(plugin.hooks.data_post, ['add_p0f_header'])
   })
 })
 
-describe('load_p0f_ini', function () {
-  it('loads p0f.ini from config/p0f.ini', function () {
-    this.plugin.load_p0f_ini()
-    assert.ok(this.plugin.cfg)
-    assert.ok(this.plugin.cfg.main)
+describe('load_p0f_ini', () => {
+  it('loads p0f.ini from config/p0f.ini', () => {
+    plugin.load_p0f_ini()
+    assert.ok(plugin.cfg)
+    assert.ok(plugin.cfg.main)
   })
 })
 
-describe('start_p0f_client', function () {
+describe('start_p0f_client', () => {
   let next, server
 
-  beforeEach(function () {
+  beforeEach(() => {
     next = sinon.spy()
 
     server = {
@@ -71,60 +85,60 @@ describe('start_p0f_client', function () {
     }
   })
 
-  it('will return if missing socket_path', function () {
-    this.plugin.start_p0f_client(next, server)
+  it('will return if missing socket_path', () => {
+    plugin.start_p0f_client(next, server)
 
     sinon.assert.calledOnce(next)
   })
 })
 
-describe('query_p0f', function () {
-  beforeEach(function () {
-    this.connection.remote.is_private = false
-    this.connection.remote.ip = '1.2.3.4'
-    this.connection.server.notes = {}
+describe('query_p0f', () => {
+  beforeEach(() => {
+    connection.remote.is_private = false
+    connection.remote.ip = '1.2.3.4'
+    connection.server.notes = {}
   })
 
-  it('ignores private IPs', async function () {
-    this.connection.remote = { is_private: true }
+  it('ignores private IPs', async () => {
+    connection.remote = { is_private: true }
 
-    await this.plugin.query_p0f(this.next, this.connection)
+    await plugin.query_p0f(next, connection)
 
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(next)
   })
 
-  it('calls next if p0f client is missing', async function () {
-    await this.plugin.query_p0f(this.next, this.connection)
+  it('calls next if p0f client is missing', async () => {
+    await plugin.query_p0f(next, connection)
 
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(next)
   })
 
-  it('stores error result when p0f query fails', async function () {
-    this.connection.server.notes = {
+  it('stores error result when p0f query fails', async () => {
+    connection.server.notes = {
       p0f_client: { query: sinon.stub().callsFake((_ip, cb) => cb(new Error('connection refused'))) },
     }
 
-    await this.plugin.query_p0f(this.next, this.connection)
+    await plugin.query_p0f(next, connection)
 
-    const result = this.connection.results.get('p0f')
+    const result = connection.results.get('p0f')
     assert.ok(result.err)
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(next)
   })
 
-  it('stores error result when p0f returns no match', async function () {
-    this.connection.server.notes = {
+  it('stores error result when p0f returns no match', async () => {
+    connection.server.notes = {
       p0f_client: { query: sinon.stub().callsFake((_ip, cb) => cb(null, null)) },
     }
 
-    await this.plugin.query_p0f(this.next, this.connection)
+    await plugin.query_p0f(next, connection)
 
-    const result = this.connection.results.get('p0f')
+    const result = connection.results.get('p0f')
     assert.ok(result.err)
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(next)
   })
 
-  it('stores p0f result on success', async function () {
-    this.connection.server.notes = {
+  it('stores p0f result on success', async () => {
+    connection.server.notes = {
       p0f_client: {
         query: sinon.stub().callsFake((_ip, cb) =>
           cb(null, {
@@ -139,69 +153,69 @@ describe('query_p0f', function () {
       },
     }
 
-    await this.plugin.query_p0f(this.next, this.connection)
+    await plugin.query_p0f(next, connection)
 
-    const result = this.connection.results.get('p0f')
+    const result = connection.results.get('p0f')
     assert.strictEqual(result.os_name, 'Linux')
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(next)
   })
 })
 
-describe('add_p0f_header', function () {
+describe('add_p0f_header', () => {
   let logdebug_spy, remove_header_spy
 
-  beforeEach(function () {
-    this.connection.results.add({ name: 'p0f' }, { os_name: 'BeOS', os_flavor: 'forever' })
+  beforeEach(() => {
+    connection.results.add({ name: 'p0f' }, { os_name: 'BeOS', os_flavor: 'forever' })
 
-    logdebug_spy = sinon.spy(this.connection, 'logdebug')
-    remove_header_spy = sinon.spy(this.connection.transaction, 'remove_header')
+    logdebug_spy = sinon.spy(connection, 'logdebug')
+    remove_header_spy = sinon.spy(connection.transaction, 'remove_header')
   })
 
-  it('ignores private IPs', async function () {
-    this.connection.remote.is_private = true
+  it('ignores private IPs', async () => {
+    connection.remote.is_private = true
 
-    await this.plugin.add_p0f_header(this.next, this.connection)
+    await plugin.add_p0f_header(next, connection)
 
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(next)
     sinon.assert.notCalled(logdebug_spy)
     sinon.assert.notCalled(remove_header_spy)
   })
 
-  it('skips adding a header', async function () {
-    await this.plugin.add_p0f_header(this.next, this.connection)
+  it('skips adding a header', async () => {
+    await plugin.add_p0f_header(next, connection)
 
-    sinon.assert.calledOnceWithExactly(logdebug_spy, this.plugin, 'header disabled in ini')
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(logdebug_spy, plugin, 'header disabled in ini')
+    sinon.assert.calledOnceWithExactly(next)
   })
 
-  it('adds a header when data exists', async function () {
-    this.plugin.cfg.main.add_header = 'X-p0f-Result'
+  it('adds a header when data exists', async () => {
+    plugin.cfg.main.add_header = 'X-p0f-Result'
 
-    await this.plugin.add_p0f_header(this.next, this.connection)
+    await plugin.add_p0f_header(next, connection)
 
     sinon.assert.calledOnceWithExactly(remove_header_spy, 'X-p0f-Result')
-    sinon.assert.calledOnceWithExactly(this.next)
-    assert.equal(this.connection.transaction.header.get('X-p0f-Result'), `os="BeOS forever"`)
+    sinon.assert.calledOnceWithExactly(next)
+    assert.equal(connection.transaction.header.get('X-p0f-Result'), `os="BeOS forever"`)
   })
 
-  it('records error when result exists but has no os_name', async function () {
-    this.plugin.cfg.main.add_header = 'X-p0f-Result'
+  it('records error when result exists but has no os_name', async () => {
+    plugin.cfg.main.add_header = 'X-p0f-Result'
 
     // Use a fresh connection so the beforeEach os_name doesn't bleed in
     const conn = fixtures.connection.createConnection()
     conn.init_transaction()
     conn.results.add({ name: 'p0f' }, { link_type: 'Ethernet' })
 
-    await this.plugin.add_p0f_header(this.next, conn)
+    await plugin.add_p0f_header(next, conn)
 
-    sinon.assert.calledOnceWithExactly(this.next)
+    sinon.assert.calledOnceWithExactly(next)
     //assert.equal(this.connection.transaction.header.headers['x-p0f-result'], undefined)
-    assert.ok(conn.results.has(this.plugin, 'err', 'no p0f note'))
+    assert.ok(conn.results.has(plugin, 'err', 'no p0f note'))
     assert.equal(conn.transaction.header.get('X-p0f-Result').length, 0)
   })
 })
 
-describe('P0FClient.decode_response', function () {
+describe('P0FClient.decode_response', () => {
   function makeOkBuffer({ os_name = '', os_flavor = '' } = {}) {
     const buf = Buffer.alloc(232, 0)
     buf.writeUInt32LE(0x50304602, 0) // response magic
@@ -211,18 +225,20 @@ describe('P0FClient.decode_response', function () {
     return buf
   }
 
-  beforeEach(function () {
+  let client
+
+  beforeEach(() => {
     stubNetConnection()
-    this.client = new P0FClient('/tmp/fake.sock')
+    client = new P0FClient('/tmp/fake.sock')
   })
 
-  it('throws when receive_queue is empty', function () {
+  it('throws when receive_queue is empty', () => {
     const buf = makeOkBuffer()
-    assert.throws(() => this.client.decode_response(buf), /unexpected data received/)
+    assert.throws(() => client.decode_response(buf), /unexpected data received/)
   })
 
-  it('returns error on bad magic', function (done) {
-    this.client.receive_queue.push({
+  it('returns error on bad magic', (t, done) => {
+    client.receive_queue.push({
       ip: '1.2.3.4',
       cb: (err) => {
         assert.ok(err)
@@ -234,11 +250,11 @@ describe('P0FClient.decode_response', function () {
     const buf = Buffer.alloc(232, 0)
     buf.writeUInt32LE(0xdeadbeef, 0)
     buf.writeUInt32LE(0x10, 4)
-    this.client.decode_response(buf)
+    client.decode_response(buf)
   })
 
-  it('returns error on bad query status (0x00)', function (done) {
-    this.client.receive_queue.push({
+  it('returns error on bad query status (0x00)', (t, done) => {
+    client.receive_queue.push({
       ip: '1.2.3.4',
       cb: (err) => {
         assert.ok(err)
@@ -250,11 +266,11 @@ describe('P0FClient.decode_response', function () {
     const buf = Buffer.alloc(232, 0)
     buf.writeUInt32LE(0x50304602, 0)
     buf.writeUInt32LE(0x00, 4)
-    this.client.decode_response(buf)
+    client.decode_response(buf)
   })
 
-  it('returns null on no-match status (0x20)', function (done) {
-    this.client.receive_queue.push({
+  it('returns null on no-match status (0x20)', (t, done) => {
+    client.receive_queue.push({
       ip: '1.2.3.4',
       cb: (err, result) => {
         assert.equal(err, null)
@@ -266,11 +282,11 @@ describe('P0FClient.decode_response', function () {
     const buf = Buffer.alloc(232, 0)
     buf.writeUInt32LE(0x50304602, 0)
     buf.writeUInt32LE(0x20, 4)
-    this.client.decode_response(buf)
+    client.decode_response(buf)
   })
 
-  it('decodes OS name and flavor on OK status (0x10)', function (done) {
-    this.client.receive_queue.push({
+  it('decodes OS name and flavor on OK status (0x10)', (t, done) => {
+    client.receive_queue.push({
       ip: '1.2.3.4',
       cb: (err, result) => {
         assert.equal(err, null)
@@ -281,60 +297,155 @@ describe('P0FClient.decode_response', function () {
       },
     })
 
-    this.client.decode_response(makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' }))
+    client.decode_response(makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' }))
   })
 
-  it('throws on unknown status code', function () {
-    this.client.receive_queue.push({ ip: '1.2.3.4', cb: sinon.stub() })
+  it('throws on unknown status code', () => {
+    client.receive_queue.push({ ip: '1.2.3.4', cb: sinon.stub() })
 
     const buf = Buffer.alloc(232, 0)
     buf.writeUInt32LE(0x50304602, 0)
     buf.writeUInt32LE(0xff, 4)
-    assert.throws(() => this.client.decode_response(buf), /unknown status/)
+    assert.throws(() => client.decode_response(buf), /unknown status/)
   })
 })
 
-describe('P0FClient.query', function () {
-  beforeEach(function () {
+describe('P0FClient.query', () => {
+  let client
+
+  beforeEach(() => {
     stubNetConnection()
-    this.client = new P0FClient('/tmp/fake.sock')
-    this.client.connected = true
-    this.client.ready = true
+    client = new P0FClient('/tmp/fake.sock')
+    client.connected = true
+    client.ready = true
   })
 
-  it('calls cb with error when socket has error', function (done) {
+  it('calls cb with error when socket has error', (t, done) => {
     const socketErr = new Error('broken pipe')
-    this.client.socket_has_error = socketErr
+    client.socket_has_error = socketErr
 
-    this.client.query('1.2.3.4', (err) => {
+    client.query('1.2.3.4', (err) => {
       assert.strictEqual(err, socketErr)
       done()
     })
   })
 
-  it('calls cb with error when not connected', function (done) {
-    this.client.connected = false
+  it('calls cb with error when not connected', (t, done) => {
+    client.connected = false
 
-    this.client.query('1.2.3.4', (err) => {
+    client.query('1.2.3.4', (err) => {
       assert.ok(err)
       assert.ok(/not connected/.test(err.message))
       done()
     })
   })
 
-  it('queues request to send_queue when socket not ready', function () {
-    this.client.ready = false
+  it('queues request to send_queue when socket not ready', () => {
+    client.ready = false
 
-    this.client.query('1.2.3.4', sinon.stub())
+    client.query('1.2.3.4', sinon.stub())
 
-    assert.strictEqual(this.client.send_queue.length, 1)
-    assert.strictEqual(this.client.send_queue[0].ip, '1.2.3.4')
+    assert.strictEqual(client.send_queue.length, 1)
+    assert.strictEqual(client.send_queue[0].ip, '1.2.3.4')
   })
 
-  it('pushes to receive_queue and writes socket when ready', function () {
-    this.client.query('1.2.3.4', sinon.stub())
+  it('pushes to receive_queue and writes socket when ready', () => {
+    client.query('1.2.3.4', sinon.stub())
 
-    assert.strictEqual(this.client.receive_queue.length, 1)
-    assert.strictEqual(this.client.receive_queue[0].ip, '1.2.3.4')
+    assert.strictEqual(client.receive_queue.length, 1)
+    assert.strictEqual(client.receive_queue[0].ip, '1.2.3.4')
+  })
+})
+
+describe('P0FClient lifecycle', () => {
+  let sock
+  let client
+
+  beforeEach(() => {
+    sock = stubNetConnection()
+    client = new P0FClient('/tmp/fake.sock')
+  })
+
+  afterEach(() => client.shutdown())
+
+  it("'connect' marks ready and drains the send queue", () => {
+    // connected but not yet ready -> request lands in send_queue
+    client.connected = true
+    client.ready = false
+    client.query('8.8.8.8', sinon.stub())
+    assert.equal(client.send_queue.length, 1)
+
+    sock.emit('connect')
+
+    assert.equal(client.connected, true)
+    assert.equal(client.ready, true)
+    assert.equal(client.send_queue.length, 0) // flushed
+    assert.equal(client.receive_queue.length, 1)
+  })
+
+  it("'data' decodes a response and invokes the queued cb", (t, done) => {
+    sock.emit('connect')
+    client.query('8.8.8.8', (err, res) => {
+      assert.ifError(err)
+      assert.equal(res.os_name, 'Linux')
+      assert.equal(res.total_conn, 42)
+      done()
+    })
+    sock.emit('data', okResponse('Linux'))
+  })
+
+  it("'data' splits multiple 232-byte records", () => {
+    sock.emit('connect')
+    const cbs = [sinon.stub(), sinon.stub()]
+    client.query('1.1.1.1', cbs[0])
+    client.query('2.2.2.2', cbs[1])
+    sock.emit('data', Buffer.concat([okResponse('A'), okResponse('B')]))
+    assert.ok(cbs[0].calledOnce)
+    assert.ok(cbs[1].calledOnce)
+  })
+
+  it("'drain' re-readies and processes the queue", () => {
+    sock.emit('connect')
+    client.ready = false
+    sock.emit('drain')
+    assert.equal(client.ready, true)
+  })
+
+  it("'error' fails queued requests and schedules a reconnect", (t, done) => {
+    sock.emit('connect')
+    client.receive_queue.push({
+      ip: '9.9.9.9',
+      cb: (err) => {
+        assert.ok(err)
+        assert.match(err.message, /socket: \/tmp\/fake\.sock/)
+        assert.ok(client.restart_interval) // reconnect scheduled
+        done()
+      },
+    })
+    sock.emit('error', new Error('ECONNRESET'))
+    assert.equal(client.connected, false)
+  })
+
+  it('process_send_queue fails queued items when socket has error', () => {
+    const cb = sinon.stub()
+    client.socket_has_error = new Error('dead')
+    client.send_queue.push({ ip: '5.5.5.5', cb, buf: Buffer.alloc(21) })
+    client.process_send_queue()
+    assert.ok(cb.calledOnceWith(client.socket_has_error))
+  })
+})
+
+describe('start_p0f_client', () => {
+  afterEach(() => sinon.restore())
+
+  it('creates a P0FClient when socket_path is configured', () => {
+    stubNetConnection()
+    plugin.cfg.main.socket_path = '/tmp/p0f.sock'
+    const server = { notes: {}, logerror: sinon.stub() }
+    const nextSpy = sinon.spy()
+    plugin.start_p0f_client(nextSpy, server)
+    assert.ok(server.notes.p0f_client instanceof P0FClient)
+    assert.ok(nextSpy.calledOnce)
+    server.notes.p0f_client.shutdown()
   })
 })
