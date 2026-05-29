@@ -2,7 +2,7 @@ const assert = require('node:assert')
 const { describe, it, beforeEach, afterEach } = require('node:test')
 
 // npm modules
-const fixtures = require('haraka-test-fixtures')
+const { makeConnection, makePlugin } = require('haraka-test-fixtures')
 const sinon = require('sinon')
 
 const { P0FClient } = require('../index.js')
@@ -32,12 +32,8 @@ function okResponse(osName = 'Linux', flavor = '3.x') {
 let plugin, connection, next
 
 beforeEach(() => {
-  plugin = new fixtures.plugin('p0f')
-  connection = new fixtures.connection.createConnection()
-  connection.init_transaction()
-
-  plugin.register()
-
+  plugin = makePlugin('p0f')
+  connection = makeConnection({ withTxn: true })
   next = sinon.spy()
 })
 
@@ -202,8 +198,7 @@ describe('add_p0f_header', () => {
     plugin.cfg.main.add_header = 'X-p0f-Result'
 
     // Use a fresh connection so the beforeEach os_name doesn't bleed in
-    const conn = fixtures.connection.createConnection()
-    conn.init_transaction()
+    const conn = makeConnection({ withTxn: true })
     conn.results.add({ name: 'p0f' }, { link_type: 'Ethernet' })
 
     await plugin.add_p0f_header(next, conn)

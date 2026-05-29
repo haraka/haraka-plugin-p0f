@@ -1,8 +1,6 @@
-[![Build Status][ci-img]][ci-url]
-[![Code Climate][clim-img]][clim-url]
-[![Code Coverage][cov-img]][cov-url]
-
 # haraka-plugin-p0f
+
+[![Test][ci-img]][ci-url] [![Cover][cov-img]][cov-url] [![Qlty][qlty-img]][qlty-url]
 
 TCP Fingerprinting
 
@@ -58,7 +56,7 @@ In the contrib/bsd-rc.d directory is a startup file for FreeBSD.
 
 [ci-img]: https://github.com/haraka/haraka-plugin-p0f/actions/workflows/ci.yml/badge.svg
 [ci-url]: https://github.com/haraka/haraka-plugin-p0f/actions/workflows/ci.yml
-[clim-img]: https://codeclimate.com/github/haraka/haraka-plugin-p0f/badges/gpa.svg
-[clim-url]: https://codeclimate.com/github/haraka/haraka-plugin-p0f
-[cov-url]: https://coveralls.io/github/haraka/haraka-plugin-p0f
-[cov-img]: https://coveralls.io/repos/github/haraka/haraka-plugin-p0f/badge.svg
+[cov-img]: https://codecov.io/github/haraka/haraka-plugin-p0f/coverage.svg
+[cov-url]: https://codecov.io/github/haraka/haraka-plugin-p0f
+[qlty-img]: https://qlty.sh/gh/haraka/projects/haraka-plugin-p0f/maintainability.svg
+[qlty-url]: https://qlty.sh/gh/haraka/projects/haraka-plugin-p0f

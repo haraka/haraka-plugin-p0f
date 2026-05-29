@@ -9,11 +9,13 @@
   ],
   "main": "index.js",
   "scripts": {
+    "prepare": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks || true",
     "format": "npm run prettier:fix && npm run lint:fix",
     "lint": "npx eslint *.js test",
     "lint:fix": "npx eslint --fix *.js test",
     "prettier": "npx prettier . --check",
     "prettier:fix": "npx prettier . --write --log-level=warn",
+    "qlty": "qlty smells --all",
     "test": "node --test test/*.js",
     "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=package.json --test-coverage-exclude=test/*.js test/*.js",
     "versions": "npx npm-dep-mgr check",
@@ -35,8 +37,8 @@
   },
   "homepage": "https://github.com/haraka/haraka-plugin-p0f#readme",
   "devDependencies": {
-    "@haraka/eslint-config": "^2.0.4",
-    "haraka-test-fixtures": "^1.6.0",
+    "@haraka/eslint-config": "^3.0.0",
+    "haraka-test-fixtures": "^1.7.0",
     "sinon": "^22.0.0"
   },
   "dependencies": {

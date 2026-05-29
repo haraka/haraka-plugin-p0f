@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+- test: refactored against test-fixtures 1.7.0
+
 ### [1.0.14] - 2026-05-18
 
 - cover: removed HARAKA_COVERAGE, more CLI and less config (#38)
