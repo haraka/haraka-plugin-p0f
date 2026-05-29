@@ -10,6 +10,7 @@ class P0FClient {
     this.sock = null
     this.send_queue = []
     this.receive_queue = []
+    this.recv_buffer = Buffer.alloc(0)
     this.connected = false
     this.ready = false
     this.socket_has_error = false
@@ -32,8 +33,17 @@ class P0FClient {
     })
 
     this.sock.on('data', (data) => {
-      for (let i = 0; i < data.length / 232; i++) {
-        this.decode_response(data.slice(i ? 232 * i : 0, 232 * (i + 1)))
+      this.recv_buffer = Buffer.concat([this.recv_buffer, data])
+      while (this.recv_buffer.length >= 232) {
+        const frame = this.recv_buffer.subarray(0, 232)
+        this.recv_buffer = this.recv_buffer.subarray(232)
+        try {
+          this.decode_response(frame)
+        } catch (err) {
+          // surface to the next pending caller (if any) and continue
+          const item = this.receive_queue.shift()
+          if (item) item.cb(err)
+        }
       }
     })
 
@@ -54,11 +64,9 @@ class P0FClient {
           this.connect(path)
         }, 5 * 1000)
       }
-      // Clear the receive queue
-      for (let i = 0; i < this.receive_queue.length; i++) {
+      while (this.receive_queue.length) {
         const item = this.receive_queue.shift()
         item.cb(this.socket_has_error)
-        continue
       }
       this.process_send_queue()
     })
@@ -133,39 +141,32 @@ class P0FClient {
     if (this.socket_has_error) {
       return cb(this.socket_has_error)
     }
-    if (!this.connected) {
-      return cb(new Error('socket not connected'))
-    }
     const addr = ipaddr.parse(ip)
     const bytes = addr.toByteArray()
-    const buf = new Buffer.alloc(21)
+    const buf = Buffer.alloc(21)
     buf.writeUInt32LE(0x50304601, 0) // query magic
     buf.writeUInt8(addr.kind() === 'ipv6' ? 0x6 : 0x4, 4)
     for (let i = 0; i < bytes.length; i++) {
       buf.writeUInt8(bytes[i], 5 + i)
     }
-    if (!this.ready) {
+    // enqueue and drain on connect rather than failing fast.
+    if (!this.connected || !this.ready) {
       this.send_queue.push({ ip, cb, buf })
-    } else {
-      this.receive_queue.push({ ip, cb })
-      if (!this.sock.write(buf)) this.ready = false
+      return
     }
+    this.receive_queue.push({ ip, cb })
+    if (!this.sock.write(buf)) this.ready = false
   }
 
   process_send_queue() {
-    if (this.send_queue.length === 0) {
-      return
-    }
-
-    for (let i = 0; i < this.send_queue.length; i++) {
-      let item
+    while (this.send_queue.length) {
       if (this.socket_has_error) {
-        item = this.send_queue.shift()
+        const item = this.send_queue.shift()
         item.cb(this.socket_has_error)
         continue
       }
       if (!this.ready) break
-      item = this.send_queue.shift()
+      const item = this.send_queue.shift()
       this.receive_queue.push({ ip: item.ip, cb: item.cb })
       if (!this.sock.write(item.buf)) {
         this.ready = false

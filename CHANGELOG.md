@@ -4,6 +4,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+- security: buffer p0f socket data, decode only complete frames
+- fix: drain send/receive queues with `while (length)`
+- fix: queue queries during socket startup/reconnect
 - test: refactored against test-fixtures 1.7.0
 
 ### [1.0.14] - 2026-05-18

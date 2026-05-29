@@ -303,6 +303,33 @@ describe('P0FClient.decode_response', () => {
     buf.writeUInt32LE(0xff, 4)
     assert.throws(() => client.decode_response(buf), /unknown status/)
   })
+
+  it('reassembles a response split across two TCP chunks', (t, done) => {
+    client.receive_queue.push({
+      ip: '1.2.3.4',
+      cb: (err, p0f) => {
+        assert.equal(err, null)
+        assert.equal(p0f.os_name, 'Linux')
+        done()
+      },
+    })
+    const frame = makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' })
+    // simulate the kernel handing us the frame in two pieces
+    client.sock.emit('data', frame.subarray(0, 100))
+    client.sock.emit('data', frame.subarray(100))
+  })
+
+  it('catches parse error without crashing and surfaces to caller', (t, done) => {
+    client.receive_queue.push({
+      ip: '1.2.3.4',
+      cb: (err) => {
+        assert.ok(err)
+        done()
+      },
+    })
+    const bad = Buffer.alloc(232, 0xff)
+    client.sock.emit('data', bad)
+  })
 })
 
 describe('P0FClient.query', () => {
@@ -325,14 +352,15 @@ describe('P0FClient.query', () => {
     })
   })
 
-  it('calls cb with error when not connected', (t, done) => {
+  it('queues the request when not yet connected (C2)', () => {
     client.connected = false
+    client.ready = false
 
-    client.query('1.2.3.4', (err) => {
-      assert.ok(err)
-      assert.ok(/not connected/.test(err.message))
-      done()
-    })
+    client.query('1.2.3.4', sinon.stub())
+
+    assert.strictEqual(client.send_queue.length, 1)
+    assert.strictEqual(client.send_queue[0].ip, '1.2.3.4')
+    assert.strictEqual(client.receive_queue.length, 0)
   })
 
   it('queues request to send_queue when socket not ready', () => {

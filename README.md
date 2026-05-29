@@ -6,9 +6,7 @@ TCP Fingerprinting
 
 Supply TCP fingerprint info (remote computer OS, network distance, etc) about the remote mail server. This can be used to implement more sophisticated anti-spam policies.
 
-This plugin inserts a _p0f_ connection note with information deduced
-from the TCP fingerprint. The note typically includes at least the link,
-detail, distance, uptime, genre. Here's an example:
+This plugin store results with information deduced from the TCP fingerprint. The store typically includes at least the link, detail, distance, uptime, genre. Here's an example:
 
 genre => FreeBSD
 detail => 8.x (1)
@@ -22,7 +20,7 @@ Which was parsed from this p0f fingerprint:
 -> 208.75.177.101:25 (distance 17, link: ethernet/modem)
 
 The following additional values may also be available in
-the _p0f_ connection note:
+the _p0f_ connection store:
 
     magic, status, first_seen, last_seen, total_conn, uptime_min, up_mod_days, last_nat, last_chg, distance, bad_sw, os_match_q, os_name, os_flavor, http_name, http_flavor, link_type, and language.
 
