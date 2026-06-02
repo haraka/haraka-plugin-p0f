@@ -4,9 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.0.15] - 2026-06-01
+
 - security: buffer p0f socket data, decode only complete frames
 - fix: drain send/receive queues with `while (length)`
 - fix: queue queries during socket startup/reconnect
+- fix: surface an unknown p0f status to the caller (was a double-shift)
+- fix: clear recv_buffer on socket error
 - test: refactored against test-fixtures 1.7.0
 
 ### [1.0.14] - 2026-05-18
@@ -94,3 +98,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.0.11]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.11
 [1.0.13]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.13
 [1.0.14]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.14
+[1.0.15]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.15

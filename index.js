@@ -40,9 +40,7 @@ class P0FClient {
         try {
           this.decode_response(frame)
         } catch (err) {
-          // surface to the next pending caller (if any) and continue
-          const item = this.receive_queue.shift()
-          if (item) item.cb(err)
+          if (err?.message !== 'unexpected data received') throw err
         }
       }
     })
@@ -56,6 +54,8 @@ class P0FClient {
       this.connected = false
       error.message = `${error.message} (socket: ${path})`
       this.socket_has_error = error
+      // drop partial bytes so they can't corrupt the next connection's frame
+      this.recv_buffer = Buffer.alloc(0)
       this.sock.destroy()
 
       // Try and reconnect
@@ -133,7 +133,7 @@ class P0FClient {
       case 0x20:
         return item.cb(null, null)
       default:
-        throw new Error(`unknown status: ${st}`)
+        return item.cb(new Error(`unknown status: ${st}`))
     }
   }
 

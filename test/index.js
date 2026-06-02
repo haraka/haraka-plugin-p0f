@@ -295,13 +295,19 @@ describe('P0FClient.decode_response', () => {
     client.decode_response(makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' }))
   })
 
-  it('throws on unknown status code', () => {
-    client.receive_queue.push({ ip: '1.2.3.4', cb: sinon.stub() })
+  it('surfaces an unknown status code to the caller', (t, done) => {
+    client.receive_queue.push({
+      ip: '1.2.3.4',
+      cb: (err) => {
+        assert.ok(/unknown status/.test(err.message))
+        done()
+      },
+    })
 
     const buf = Buffer.alloc(232, 0)
     buf.writeUInt32LE(0x50304602, 0)
     buf.writeUInt32LE(0xff, 4)
-    assert.throws(() => client.decode_response(buf), /unknown status/)
+    client.decode_response(buf)
   })
 
   it('reassembles a response split across two TCP chunks', (t, done) => {
@@ -319,7 +325,7 @@ describe('P0FClient.decode_response', () => {
     client.sock.emit('data', frame.subarray(100))
   })
 
-  it('catches parse error without crashing and surfaces to caller', (t, done) => {
+  it('surfaces a bad frame to the queued caller via the data handler', (t, done) => {
     client.receive_queue.push({
       ip: '1.2.3.4',
       cb: (err) => {
@@ -327,8 +333,15 @@ describe('P0FClient.decode_response', () => {
         done()
       },
     })
-    const bad = Buffer.alloc(232, 0xff)
+    const bad = Buffer.alloc(232, 0xff) // bad response magic
     client.sock.emit('data', bad)
+  })
+
+  it('drops an unexpected frame with no pending caller', () => {
+    // empty receive_queue -> decode_response throws -> data handler swallows it
+    assert.equal(client.receive_queue.length, 0)
+    const frame = makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' })
+    assert.doesNotThrow(() => client.sock.emit('data', frame))
   })
 })
 
@@ -447,6 +460,13 @@ describe('P0FClient lifecycle', () => {
     })
     sock.emit('error', new Error('ECONNRESET'))
     assert.equal(client.connected, false)
+  })
+
+  it("'error' clears partial recv_buffer", () => {
+    sock.emit('connect')
+    client.recv_buffer = Buffer.from([1, 2, 3]) // partial frame in flight
+    sock.emit('error', new Error('ECONNRESET'))
+    assert.equal(client.recv_buffer.length, 0)
   })
 
   it('process_send_queue fails queued items when socket has error', () => {
