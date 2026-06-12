@@ -22,7 +22,7 @@ Which was parsed from this p0f fingerprint:
 The following additional values may also be available in
 the _p0f_ connection store:
 
-    magic, status, first_seen, last_seen, total_conn, uptime_min, up_mod_days, last_nat, last_chg, distance, bad_sw, os_match_q, os_name, os_flavor, http_name, http_flavor, link_type, and language.
+    query, first_seen, last_seen, total_conn, uptime_min, up_mod_days, last_nat, last_chg, distance, bad_sw, os_match_q, os_name, os_flavor, http_name, http_flavor, link_type, and language.
 
 ## Configuration
 

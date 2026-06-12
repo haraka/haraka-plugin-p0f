@@ -9,8 +9,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 - security: buffer p0f socket data, decode only complete frames
 - fix: drain send/receive queues with `while (length)`
 - fix: queue queries during socket startup/reconnect
-- fix: surface an unknown p0f status to the caller (was a double-shift)
+- fix: surface an unknown p0f status to the caller
 - fix: clear recv_buffer on socket error
+- fix: fail queued queries on socket timeout
+- fix: reschedule reconnect after a successful reconnect
 - test: refactored against test-fixtures 1.7.0
 
 ### [1.0.14] - 2026-05-18

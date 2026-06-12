@@ -38,7 +38,7 @@
   "homepage": "https://github.com/haraka/haraka-plugin-p0f#readme",
   "devDependencies": {
     "@haraka/eslint-config": "^3.0.0",
-    "haraka-test-fixtures": "^1.7.0",
+    "haraka-test-fixtures": "^1.7.1",
     "sinon": "^22.0.0"
   },
   "dependencies": {

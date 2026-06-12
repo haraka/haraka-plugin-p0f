@@ -20,6 +20,9 @@ class P0FClient {
   }
 
   connect(path) {
+    // each (re)connect attempt starts clean so queries arriving while we
+    // reconnect get queued and drained, rather than failing fast.
+    this.socket_has_error = false
     this.sock = net.createConnection(path)
     this.sock.setTimeout(5 * 1000)
 
@@ -28,7 +31,10 @@ class P0FClient {
       this.connected = true
       this.socket_has_error = false
       this.ready = true
-      if (this.restart_interval) clearInterval(this.restart_interval)
+      if (this.restart_interval) {
+        clearInterval(this.restart_interval)
+        this.restart_interval = false
+      }
       this.process_send_queue()
     })
 
@@ -43,6 +49,9 @@ class P0FClient {
           if (err?.message !== 'unexpected data received') throw err
         }
       }
+      // subarray() keeps a view of the full backing allocation; release it
+      // once drained so a large chunk isn't retained until the next concat.
+      if (this.recv_buffer.length === 0) this.recv_buffer = Buffer.alloc(0)
     })
 
     this.sock.on('drain', () => {
@@ -50,8 +59,15 @@ class P0FClient {
       this.process_send_queue()
     })
 
+    // a stalled socket emits 'timeout' but stays open; surface it as an error
+    // so queued callbacks fail fast instead of hanging the calling hook.
+    this.sock.on('timeout', () => {
+      this.sock.destroy(new Error('socket timeout'))
+    })
+
     this.sock.on('error', (error) => {
       this.connected = false
+      this.ready = false
       error.message = `${error.message} (socket: ${path})`
       this.socket_has_error = error
       // drop partial bytes so they can't corrupt the next connection's frame

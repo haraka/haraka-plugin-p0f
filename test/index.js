@@ -469,6 +469,39 @@ describe('P0FClient lifecycle', () => {
     assert.equal(client.recv_buffer.length, 0)
   })
 
+  it('queues queries while reconnecting after an error', () => {
+    sock.emit('connect')
+    sock.emit('error', new Error('ECONNRESET'))
+    assert.ok(client.socket_has_error) // failed, awaiting reconnect
+
+    client.connect('/tmp/fake.sock') // reconnect attempt clears the error
+    assert.equal(client.socket_has_error, false)
+
+    client.query('8.8.8.8', sinon.stub())
+    assert.equal(client.send_queue.length, 1) // queued, not failed fast
+    assert.equal(client.receive_queue.length, 0)
+  })
+
+  it('reschedules reconnect after a successful reconnect', () => {
+    sock.emit('connect')
+    sock.emit('error', new Error('ECONNRESET'))
+    assert.ok(client.restart_interval) // first reconnect scheduled
+
+    sock.emit('connect') // reconnect succeeds, interval cleared
+    assert.equal(client.restart_interval, false)
+
+    sock.emit('error', new Error('ECONNRESET again'))
+    assert.ok(client.restart_interval) // a fresh reconnect is scheduled
+  })
+
+  it("'timeout' destroys the socket with an error", () => {
+    sock.emit('connect')
+    sock.emit('timeout')
+    assert.ok(sock.destroy.calledOnce)
+    assert.ok(sock.destroy.firstCall.args[0] instanceof Error)
+    assert.match(sock.destroy.firstCall.args[0].message, /timeout/)
+  })
+
   it('process_send_queue fails queued items when socket has error', () => {
     const cb = sinon.stub()
     client.socket_has_error = new Error('dead')
