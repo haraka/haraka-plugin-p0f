@@ -49,9 +49,9 @@ class P0FClient {
           if (err?.message !== 'unexpected data received') throw err
         }
       }
-      // subarray() keeps a view of the full backing allocation; release it
-      // once drained so a large chunk isn't retained until the next concat.
-      if (this.recv_buffer.length === 0) this.recv_buffer = Buffer.alloc(0)
+      // subarray() keeps a view of the full backing allocation; copy the
+      // unparsed remainder into a fresh buffer so a large chunk isn't held.
+      this.recv_buffer = Buffer.from(this.recv_buffer)
     })
 
     this.sock.on('drain', () => {

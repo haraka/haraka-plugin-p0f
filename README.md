@@ -6,12 +6,12 @@ TCP Fingerprinting
 
 Supply TCP fingerprint info (remote computer OS, network distance, etc) about the remote mail server. This can be used to implement more sophisticated anti-spam policies.
 
-This plugin stores results with information deduced from the TCP fingerprint. The store typically includes at least the link, detail, distance, uptime, genre. Here's an example:
+This plugin stores results with information deduced from the TCP fingerprint. The result typically includes at least os_name, os_flavor, distance, uptime_min, and link_type. Here's an example:
 
-genre => FreeBSD
-detail => 8.x (1)
-uptime => 1390
-link => ethernet/modem
+os_name => FreeBSD
+os_flavor => 8.x (1)
+uptime_min => 1390
+link_type => ethernet/modem
 distance => 17
 
 Which was parsed from this p0f fingerprint:
