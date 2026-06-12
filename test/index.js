@@ -2,7 +2,7 @@ const assert = require('node:assert')
 const { describe, it, beforeEach, afterEach } = require('node:test')
 
 // npm modules
-const fixtures = require('haraka-test-fixtures')
+const { makeConnection, makePlugin } = require('haraka-test-fixtures')
 const sinon = require('sinon')
 
 const { P0FClient } = require('../index.js')
@@ -32,12 +32,8 @@ function okResponse(osName = 'Linux', flavor = '3.x') {
 let plugin, connection, next
 
 beforeEach(() => {
-  plugin = new fixtures.plugin('p0f')
-  connection = new fixtures.connection.createConnection()
-  connection.init_transaction()
-
-  plugin.register()
-
+  plugin = makePlugin('p0f')
+  connection = makeConnection({ withTxn: true })
   next = sinon.spy()
 })
 
@@ -202,8 +198,7 @@ describe('add_p0f_header', () => {
     plugin.cfg.main.add_header = 'X-p0f-Result'
 
     // Use a fresh connection so the beforeEach os_name doesn't bleed in
-    const conn = fixtures.connection.createConnection()
-    conn.init_transaction()
+    const conn = makeConnection({ withTxn: true })
     conn.results.add({ name: 'p0f' }, { link_type: 'Ethernet' })
 
     await plugin.add_p0f_header(next, conn)
@@ -300,13 +295,53 @@ describe('P0FClient.decode_response', () => {
     client.decode_response(makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' }))
   })
 
-  it('throws on unknown status code', () => {
-    client.receive_queue.push({ ip: '1.2.3.4', cb: sinon.stub() })
+  it('surfaces an unknown status code to the caller', (t, done) => {
+    client.receive_queue.push({
+      ip: '1.2.3.4',
+      cb: (err) => {
+        assert.ok(/unknown status/.test(err.message))
+        done()
+      },
+    })
 
     const buf = Buffer.alloc(232, 0)
     buf.writeUInt32LE(0x50304602, 0)
     buf.writeUInt32LE(0xff, 4)
-    assert.throws(() => client.decode_response(buf), /unknown status/)
+    client.decode_response(buf)
+  })
+
+  it('reassembles a response split across two TCP chunks', (t, done) => {
+    client.receive_queue.push({
+      ip: '1.2.3.4',
+      cb: (err, p0f) => {
+        assert.equal(err, null)
+        assert.equal(p0f.os_name, 'Linux')
+        done()
+      },
+    })
+    const frame = makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' })
+    // simulate the kernel handing us the frame in two pieces
+    client.sock.emit('data', frame.subarray(0, 100))
+    client.sock.emit('data', frame.subarray(100))
+  })
+
+  it('surfaces a bad frame to the queued caller via the data handler', (t, done) => {
+    client.receive_queue.push({
+      ip: '1.2.3.4',
+      cb: (err) => {
+        assert.ok(err)
+        done()
+      },
+    })
+    const bad = Buffer.alloc(232, 0xff) // bad response magic
+    client.sock.emit('data', bad)
+  })
+
+  it('drops an unexpected frame with no pending caller', () => {
+    // empty receive_queue -> decode_response throws -> data handler swallows it
+    assert.equal(client.receive_queue.length, 0)
+    const frame = makeOkBuffer({ os_name: 'Linux', os_flavor: '3.x' })
+    assert.doesNotThrow(() => client.sock.emit('data', frame))
   })
 })
 
@@ -330,14 +365,15 @@ describe('P0FClient.query', () => {
     })
   })
 
-  it('calls cb with error when not connected', (t, done) => {
+  it('queues the request when not yet connected (C2)', () => {
     client.connected = false
+    client.ready = false
 
-    client.query('1.2.3.4', (err) => {
-      assert.ok(err)
-      assert.ok(/not connected/.test(err.message))
-      done()
-    })
+    client.query('1.2.3.4', sinon.stub())
+
+    assert.strictEqual(client.send_queue.length, 1)
+    assert.strictEqual(client.send_queue[0].ip, '1.2.3.4')
+    assert.strictEqual(client.receive_queue.length, 0)
   })
 
   it('queues request to send_queue when socket not ready', () => {
@@ -424,6 +460,46 @@ describe('P0FClient lifecycle', () => {
     })
     sock.emit('error', new Error('ECONNRESET'))
     assert.equal(client.connected, false)
+  })
+
+  it("'error' clears partial recv_buffer", () => {
+    sock.emit('connect')
+    client.recv_buffer = Buffer.from([1, 2, 3]) // partial frame in flight
+    sock.emit('error', new Error('ECONNRESET'))
+    assert.equal(client.recv_buffer.length, 0)
+  })
+
+  it('queues queries while reconnecting after an error', () => {
+    sock.emit('connect')
+    sock.emit('error', new Error('ECONNRESET'))
+    assert.ok(client.socket_has_error) // failed, awaiting reconnect
+
+    client.connect('/tmp/fake.sock') // reconnect attempt clears the error
+    assert.equal(client.socket_has_error, false)
+
+    client.query('8.8.8.8', sinon.stub())
+    assert.equal(client.send_queue.length, 1) // queued, not failed fast
+    assert.equal(client.receive_queue.length, 0)
+  })
+
+  it('reschedules reconnect after a successful reconnect', () => {
+    sock.emit('connect')
+    sock.emit('error', new Error('ECONNRESET'))
+    assert.ok(client.restart_interval) // first reconnect scheduled
+
+    sock.emit('connect') // reconnect succeeds, interval cleared
+    assert.equal(client.restart_interval, false)
+
+    sock.emit('error', new Error('ECONNRESET again'))
+    assert.ok(client.restart_interval) // a fresh reconnect is scheduled
+  })
+
+  it("'timeout' destroys the socket with an error", () => {
+    sock.emit('connect')
+    sock.emit('timeout')
+    assert.ok(sock.destroy.calledOnce)
+    assert.ok(sock.destroy.firstCall.args[0] instanceof Error)
+    assert.match(sock.destroy.firstCall.args[0].message, /timeout/)
   })
 
   it('process_send_queue fails queued items when socket has error', () => {
