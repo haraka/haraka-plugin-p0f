@@ -530,7 +530,7 @@ describe('start_p0f_client', () => {
   })
 })
 
-describe('shutdown', () => {
+describe('shutdown', { skip: process.platform === 'win32' && 'needs a Unix socket' }, () => {
   let p0fd, socket_path
   const clients = []
 
