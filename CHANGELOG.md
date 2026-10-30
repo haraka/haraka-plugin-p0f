@@ -4,7 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+### [1.0.16] - 2026-10-30
+
+- close the p0f client on shutdown (#41)
 - fix: close the p0f client on shutdown
+- fix: don't open a p0f client in the cluster primary
 
 ### [1.0.15] - 2026-06-01
 
@@ -103,3 +107,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 [1.0.13]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.13
 [1.0.14]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.14
 [1.0.15]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.15
+[1.0.16]: https://github.com/haraka/haraka-plugin-p0f/releases/tag/v1.0.16
