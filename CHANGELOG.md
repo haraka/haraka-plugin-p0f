@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
 ### Unreleased
 
+- fix: close the p0f client on shutdown
+
 ### [1.0.15] - 2026-06-01
 
 - security: buffer p0f socket data, decode only complete frames

@@ -1,4 +1,5 @@
 'use strict'
+/* global server */
 // p0f v3 client - http://lcamtuf.coredump.cx/p0f3/
 
 const net = require('node:net')
@@ -15,6 +16,7 @@ class P0FClient {
     this.ready = false
     this.socket_has_error = false
     this.restart_interval = false
+    this.shut_down = false
 
     this.connect(path)
   }
@@ -75,7 +77,7 @@ class P0FClient {
       this.sock.destroy()
 
       // Try and reconnect
-      if (!this.restart_interval) {
+      if (!this.restart_interval && !this.shut_down) {
         this.restart_interval = setInterval(() => {
           this.connect(path)
         }, 5 * 1000)
@@ -89,9 +91,11 @@ class P0FClient {
   }
 
   shutdown() {
-    if (this.restart_interval) {
-      clearInterval(this.restart_interval)
-    }
+    this.shut_down = true
+    clearInterval(this.restart_interval)
+    this.restart_interval = false
+    // with an error, so that the error handler fails the queued queries
+    this.sock?.destroy(new Error('p0f client shut down'))
   }
 
   decode_response(data) {
@@ -217,6 +221,10 @@ exports.start_p0f_client = function (next, server) {
   // Start p0f process
   server.notes.p0f_client = new P0FClient(this.cfg.main.socket_path)
   next()
+}
+
+exports.shutdown = function () {
+  server.notes.p0f_client?.shutdown()
 }
 
 exports.query_p0f = function onLookup(next, connection) {

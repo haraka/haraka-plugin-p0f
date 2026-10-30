@@ -1,4 +1,9 @@
+/* global server */
 const assert = require('node:assert')
+const { once } = require('node:events')
+const net = require('node:net')
+const os = require('node:os')
+const path = require('node:path')
 const { describe, it, beforeEach, afterEach } = require('node:test')
 
 // npm modules
@@ -8,7 +13,6 @@ const sinon = require('sinon')
 const { P0FClient } = require('../index.js')
 
 function stubNetConnection() {
-  const net = require('node:net')
   const EventEmitter = require('node:events').EventEmitter
   const fakeSock = new EventEmitter()
   fakeSock.setTimeout = sinon.stub()
@@ -523,5 +527,58 @@ describe('start_p0f_client', () => {
     assert.ok(server.notes.p0f_client instanceof P0FClient)
     assert.ok(nextSpy.calledOnce)
     server.notes.p0f_client.shutdown()
+  })
+})
+
+describe('shutdown', { skip: process.platform === 'win32' && 'needs a Unix socket' }, () => {
+  let p0fd, socket_path
+  const clients = []
+
+  beforeEach(async () => {
+    socket_path = path.join(os.tmpdir(), `p0f-test-${process.pid}.sock`)
+    p0fd = net.createServer()
+    await new Promise((resolve) => p0fd.listen(socket_path, resolve))
+  })
+
+  afterEach(async () => {
+    // a client left connected would keep p0fd.close() waiting forever
+    for (const client of clients.splice(0)) {
+      clearInterval(client.restart_interval)
+      client.sock.destroy()
+    }
+    await new Promise((resolve) => p0fd.close(resolve))
+  })
+
+  async function connectedClient() {
+    const accepted = once(p0fd, 'connection')
+    const client = new P0FClient(socket_path)
+    clients.push(client)
+    const [peer] = await accepted
+    peer.resume()
+    return { client, peer }
+  }
+
+  it('fails pending queries and closes the client for good', { timeout: 2000 }, async () => {
+    const { client, peer } = await connectedClient()
+    const answer = new Promise((resolve) => client.query('8.8.8.8', resolve))
+    const closed = once(peer, 'close')
+
+    client.shutdown()
+
+    assert.match((await answer).message, /shut down/)
+    await closed
+    assert.equal(client.restart_interval, false)
+  })
+
+  it('shuts down the server p0f client', { timeout: 2000 }, async () => {
+    const { client, peer } = await connectedClient()
+    const closed = once(peer, 'close')
+    server.notes.p0f_client = client
+
+    plugin.shutdown()
+
+    await closed
+    assert.equal(client.restart_interval, false)
+    delete server.notes.p0f_client
   })
 })
