@@ -214,6 +214,9 @@ exports.load_p0f_ini = function () {
 }
 
 exports.start_p0f_client = function (next, server) {
+  // init_master runs in single-process mode, where the master does handle connections
+  if (server.cluster?.isPrimary) return next()
+
   if (!this.cfg.main.socket_path) {
     server.logerror('main.socket_path not defined in p0f.ini!')
     return next()

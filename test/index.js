@@ -528,6 +528,27 @@ describe('start_p0f_client', () => {
     assert.ok(nextSpy.calledOnce)
     server.notes.p0f_client.shutdown()
   })
+
+  it('skips the cluster primary, which never handles connections', () => {
+    stubNetConnection()
+    plugin.cfg.main.socket_path = '/tmp/p0f.sock'
+    const server = { notes: {}, logerror: sinon.stub(), cluster: { isPrimary: true } }
+    const nextSpy = sinon.spy()
+    plugin.start_p0f_client(nextSpy, server)
+    assert.strictEqual(server.notes.p0f_client, undefined)
+    assert.ok(nextSpy.calledOnce)
+  })
+
+  it('creates a P0FClient in a cluster worker', () => {
+    stubNetConnection()
+    plugin.cfg.main.socket_path = '/tmp/p0f.sock'
+    const server = { notes: {}, logerror: sinon.stub(), cluster: { isPrimary: false } }
+    const nextSpy = sinon.spy()
+    plugin.start_p0f_client(nextSpy, server)
+    assert.ok(server.notes.p0f_client instanceof P0FClient)
+    assert.ok(nextSpy.calledOnce)
+    server.notes.p0f_client.shutdown()
+  })
 })
 
 describe('shutdown', { skip: process.platform === 'win32' && 'needs a Unix socket' }, () => {
