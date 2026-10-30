@@ -214,7 +214,7 @@ exports.load_p0f_ini = function () {
 }
 
 exports.start_p0f_client = function (next, server) {
-  // init_master runs in single-process mode, where the master does handle connections
+  // init_master runs in single-process mode, where the master handles connections
   if (server.cluster?.isPrimary) return next()
 
   if (!this.cfg.main.socket_path) {
